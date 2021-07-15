@@ -6,7 +6,7 @@ ARG PROTOBUF_C_VERSION=1.3.3
 ARG GRPC_WEB_VERSION=1.2.1
 
 ARG PROTOC_GEN_GO_VERSION=1.5.1
-ARG PROTOC_GEN_GO_GRPC_VERSION=1.36.0
+ARG PROTOC_GEN_GO_GRPC_VERSION=1.30.0
 ARG GRPC_JAVA_VERSION=1.36.0
 # v1.3.2, using the version directly does not work: "tar: invalid magic"
 ARG PROTOC_GEN_GOGO_VERSION=b03c65ea87cdc3521ede29f62fe3ce239267c1bc
@@ -72,8 +72,9 @@ FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} as go_builder
 RUN apk add --no-cache build-base curl git
 
 ARG PROTOC_GEN_GO_GRPC_VERSION
-RUN mkdir -p ${GOPATH}/src/github.com/grpc/grpc-go && \
-    curl -sSL https://api.github.com/repos/grpc/grpc-go/tarball/v${PROTOC_GEN_GO_GRPC_VERSION} | tar xz --strip 1 -C ${GOPATH}/src/github.com/grpc/grpc-go &&\
+RUN mkdir -p ${GOPATH}/src/github.com/grpc && \
+    cd ${GOPATH}/src/github.com/grpc && \
+    git clone --recursive --depth=1 -b v${PROTOC_GEN_GO_GRPC_VERSION} https://github.com/grpc/grpc-go.git && \
     cd ${GOPATH}/src/github.com/grpc/grpc-go/cmd/protoc-gen-go-grpc && \
     go build -ldflags '-w -s' -o /golang-protobuf-out/protoc-gen-go-grpc . && \
     install -Ds /golang-protobuf-out/protoc-gen-go-grpc /out/usr/bin/protoc-gen-go-grpc
